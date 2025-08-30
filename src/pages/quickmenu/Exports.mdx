@@ -1,0 +1,151 @@
+---
+title: Exports
+---
+
+import { Tabs, Tab } from 'nextra-theme-docs';
+import { Callout } from 'nextra/components'
+
+# Exports
+
+`err_quickmenu` provides exports to dynamically manage radial menu options.
+
+## addOption
+
+Adds one or more options to the radial menu.
+
+<Tabs items={["Lua", "JS"]}>
+  <Tab>
+    ```lua
+    local id = exports['err_quickmenu']:addOption({
+        id = 'garage',
+        label = 'Garage',
+        icon = 'warehouse',
+        onSelect = function() print('Garage') end
+    })
+    ```
+  </Tab>
+  <Tab>
+    ```ts
+    import { exports } from '@resource_name';
+
+    let id = exports['err_quickmenu'].addOption({
+        id: 'garage',
+        label: 'Garage',
+        icon: 'warehouse',
+        onSelect: () => console.log('Garage')
+    })
+    ```
+  </Tab>
+</Tabs>
+
+## removeOption
+
+Removes a menu option by ID.
+
+<Tabs items={["Lua", "JS"]}>
+  <Tab>
+    ```lua
+    exports['err_quickmenu']:removeOption('garage')
+    ```
+  </Tab>
+  <Tab>
+    ```ts
+    exports['err_quickmenu'].removeOption('garage')
+    ```
+  </Tab>
+</Tabs>
+
+## registerSubItems
+
+Adds sub-items to an existing parent menu.
+
+<Tabs items={["Lua", "JS"]}>
+  <Tab>
+    ```lua
+    exports['err_quickmenu']:registerSubItems('garage', {
+        { id='wash', label='Car Wash', icon='soap', onSelect=function() print('Wash') end }
+    })
+    ```
+  </Tab>
+  <Tab>
+    ```ts
+    exports['err_quickmenu'].registerSubItems('garage', [
+      { id:'wash', label:'Car Wash', icon:'soap', onSelect:() => console.log('Wash') }
+    ])
+    ```
+  </Tab>
+</Tabs>
+
+## clearRadialItems
+
+Clears all dynamically added items.
+
+<Tabs items={["Lua", "JS"]}>
+  <Tab>
+    ```lua
+    exports['err_quickmenu']:clearRadialItems()
+    ```
+  </Tab>
+  <Tab>
+    ```ts
+    exports['err_quickmenu'].clearRadialItems()
+    ```
+  </Tab>
+</Tabs>
+
+## disableRadialMenu
+
+Enable/disable the entire radial menu.
+
+<Tabs items={["Lua", "JS"]}>
+  <Tab>
+    ```lua
+    exports['err_quickmenu']:disableRadialMenu(true)
+    ```
+  </Tab>
+  <Tab>
+    ```ts
+    exports['err_quickmenu'].disableRadialMenu(true)
+    ```
+  </Tab>
+</Tabs>
+
+## getRadialMenuState
+
+Returns the current menu state.
+
+<Tabs items={["Lua", "JS"]}>
+  <Tab>
+    ```lua
+    local state = exports['err_quickmenu']:getRadialMenuState()
+    print(state.open, state.disabled)
+    ```
+  </Tab>
+  <Tab>
+    ```ts
+    const state = exports['err_quickmenu'].getRadialMenuState()
+    console.log(state.open, state.disabled)
+    ```
+  </Tab>
+</Tabs>
+
+## refreshUi
+
+Refreshes the menu UI.
+
+<Tabs items={["Lua", "JS"]}>
+  <Tab>
+    ```lua
+    exports['err_quickmenu']:refreshUi()
+    ```
+  </Tab>
+  <Tab>
+    ```ts
+    exports['err_quickmenu'].refreshUi()
+    ```
+  </Tab>
+</Tabs>
+
+<Callout>
+Always provide unique IDs and keep labels short for best results.
+</Callout>

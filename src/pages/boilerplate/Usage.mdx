@@ -1,0 +1,427 @@
+---
+title: Usage Guide
+---
+
+## Using the ERR Boilerplate
+
+This guide will walk you through how to use the ERR Boilerplate to create custom FiveM resources with modern web technologies.
+
+### Creating Custom UI Components
+
+The boilerplate comes with Shadcn UI components that you can use to quickly build beautiful interfaces. Here's how to create a custom component:
+
+#### Basic Component Structure
+
+```tsx
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+
+const MyComponent = () => {
+  return (
+    <Card className="w-full max-w-md mx-auto bg-card/80 backdrop-blur-sm border shadow-lg">
+      <CardHeader>
+        <CardTitle>My Custom Component</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-muted-foreground mb-4">
+          This is a custom component built with the ERR Boilerplate.
+        </p>
+        <Button>Click Me</Button>
+      </CardContent>
+    </Card>
+  );
+};
+
+export default MyComponent;
+```
+
+### Communicating with the Game
+
+#### Fetching Data from the Client
+
+To fetch data from the client-side Lua script:
+
+```tsx
+import React, { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { fetchNui } from '@/utils/fetchNui';
+import LibIcon from '@/components/LibIcon';
+
+const PlayerInfo = () => {
+  const [playerData, setPlayerData] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const getPlayerData = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchNui('getClientData');
+      setPlayerData(data);
+    } catch (error) {
+      console.error('Failed to fetch player data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="p-4">
+      <Button 
+        onClick={getPlayerData} 
+        disabled={loading}
+        className="flex items-center gap-2"
+      >
+        <LibIcon icon="user" />
+        {loading ? 'Loading...' : 'Get Player Position'}
+      </Button>
+
+      {playerData && (
+        <div className="mt-4 p-3 bg-secondary/50 rounded-md">
+          <h3 className="font-medium mb-2">Player Position:</h3>
+          <p>X: {playerData.x.toFixed(2)}</p>
+          <p>Y: {playerData.y.toFixed(2)}</p>
+          <p>Z: {playerData.z.toFixed(2)}</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default PlayerInfo;
+```
+
+#### Listening for Events from the Client
+
+To listen for events sent from the client:
+
+```tsx
+import React, { useState } from 'react';
+import { useNuiEvent } from '@/hooks/useNuiEvent';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import LibIcon from '@/components/LibIcon';
+
+const Notifications = () => {
+  const [notifications, setNotifications] = useState([]);
+
+  useNuiEvent('showNotification', (data) => {
+    setNotifications((prev) => [...prev, data]);
+    
+    // Auto-remove notification after 5 seconds
+    setTimeout(() => {
+      setNotifications((prev) => prev.filter((n) => n.id !== data.id));
+    }, 5000);
+  });
+
+  return (
+    <div className="fixed top-4 right-4 space-y-2 w-80">
+      {notifications.map((notification) => (
+        <Alert key={notification.id} className="bg-card/90 backdrop-blur-sm border shadow-md">
+          <LibIcon icon={notification.type === 'error' ? 'circle-exclamation' : 'circle-info'} 
+                  className={notification.type === 'error' ? 'text-destructive' : 'text-primary'} />
+          <AlertTitle>{notification.title}</AlertTitle>
+          <AlertDescription>{notification.message}</AlertDescription>
+        </Alert>
+      ))}
+    </div>
+  );
+};
+
+export default Notifications;
+```
+
+### Adding Custom Lua Functions
+
+To extend the client-side functionality, add new functions to the `client/main.lua` file:
+
+```lua
+-- Get player vehicle information
+RegisterNUICallback('getVehicleData', function(_, cb)
+    local ped = PlayerPedId()
+    local vehicle = GetVehiclePedIsIn(ped, false)
+    
+    if vehicle == 0 then
+        cb({ inVehicle = false })
+        return
+    end
+    
+    local vehicleModel = GetEntityModel(vehicle)
+    local vehicleName = GetLabelText(GetDisplayNameFromVehicleModel(vehicleModel))
+    local vehicleSpeed = math.floor(GetEntitySpeed(vehicle) * 3.6) -- km/h
+    
+    cb({
+        inVehicle = true,
+        name = vehicleName,
+        speed = vehicleSpeed,
+        health = math.floor((GetVehicleBodyHealth(vehicle) / 1000) * 100)
+    })
+end)
+```
+
+## Complete Examples
+
+In this section, we'll walk through complete examples that demonstrate how to build real features with the ERR Boilerplate. These examples combine multiple concepts and show how everything works together.
+
+### Example 1: Vehicle HUD
+
+#### Prerequisites
+
+Before starting this example, follow these steps in order:
+
+1. First, ensure you have installed all dependencies in the web folder:
+```bash
+cd web
+pnpm install
+```
+
+2. Once the dependencies are installed, add the Progress component from Shadcn UI. This component will be used to display the vehicle's fuel level:
+```bash
+# Make sure you're in the web folder
+pnpm dlx shadcn@latest add progress
+```
+
+> 💡 **Tip**: You can learn more about the Progress component in the [Shadcn UI documentation](https://ui.shadcn.com/docs/components/progress). Understanding how it works will help you customize it for your needs.
+
+#### Overview
+
+In this example, we'll create a vehicle HUD that shows:
+- Vehicle speed in km/h
+- Fuel level with a progress bar
+- Smooth animations for showing/hiding the HUD
+
+The HUD will automatically appear when you enter a vehicle and disappear when you exit.
+
+This example will teach you:
+- How to monitor player state with Lua threads
+- How to send data from Lua to React
+- How to use Framer Motion for smooth animations
+- How to use the Progress component for visual feedback
+
+#### Step 1: Create the Lua Script
+
+First, create a new file called `vehicle.lua` in your `client` folder. This script will:
+1. Check if the player is in a vehicle
+2. Send vehicle data (speed and fuel) to the UI
+3. Control when the HUD should be visible
+
+Here's the complete code with explanations:
+
+```lua
+-- Track if the vehicle HUD is currently visible
+local isInVehicleUiVisible = false
+
+-- Create a loop that runs continuously to monitor vehicle state
+CreateThread(function()
+    while true do
+        -- Get the player's character (ped)
+        local ped = PlayerPedId()
+        -- Check if the player is in any vehicle
+        local isInVehicle = IsPedInAnyVehicle(ped, false)
+        
+        -- Only send UI visibility updates when the state changes
+        -- This prevents sending unnecessary messages to the UI
+        if isInVehicle ~= isInVehicleUiVisible then
+            isInVehicleUiVisible = isInVehicle
+            -- Tell the UI to show/hide the vehicle HUD
+            SendReactMessage('setVehicleUiVisible', isInVehicle)
+        end
+        
+        -- If the player is in a vehicle, send vehicle data to the UI
+        if isInVehicle then
+            -- Get the vehicle the player is in
+            local vehicle = GetVehiclePedIsIn(ped, false)
+            -- Calculate speed in km/h (multiply by 3.6 to convert from m/s)
+            local vehicleSpeed = math.floor(GetEntitySpeed(vehicle) * 3.6)
+            -- Get the current fuel level
+            local fuel = GetVehicleFuelLevel(vehicle)
+            
+            -- Send the vehicle data to our React UI
+            SendReactMessage('updateVehicleData', {
+                speed = vehicleSpeed,
+                fuel = fuel
+            })
+        end
+        
+        -- Wait before the next update:
+        -- - 100ms when in vehicle (for smooth updates)
+        -- - 1000ms when not in vehicle (to save resources)
+        Wait(isInVehicle and 100 or 1000) 
+    end
+end)
+```
+
+#### Step 2: Create the React Component
+
+Next, create a new file called `VehicleHUD.tsx` in your `src/components` folder. This component will:
+1. Listen for visibility changes from Lua
+2. Display vehicle speed and fuel level
+3. Animate smoothly when showing/hiding
+
+Here's the complete code with explanations:
+
+```tsx
+// Import required dependencies
+import React, { useState } from 'react';
+import { useNuiEvent } from '@/hooks/useNuiEvent';
+import { Progress } from '@/components/ui/progress';
+import LibIcon from '@/components/LibIcon';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const VehicleHUD = () => {
+  // State for controlling visibility and vehicle data
+  const [visible, setVisible] = useState(false);
+  const [vehicleData, setVehicleData] = useState({ speed: 0, fuel: 100 });
+
+  // Listen for messages from our Lua script
+  useNuiEvent('setVehicleUiVisible', (isVisible) => {
+    setVisible(isVisible); // Show/hide the HUD
+  });
+
+  useNuiEvent('updateVehicleData', (data) => {
+    setVehicleData(data); // Update speed and fuel data
+  });
+
+  return (
+    // AnimatePresence enables exit animations
+    <AnimatePresence>
+      {visible && (
+        // Animated container with glass-like background
+        <motion.div 
+          initial={{ opacity: 0, y: 50 }} // Start from below and fade in
+          animate={{ opacity: 1, y: 0 }} // Animate to final position
+          exit={{ opacity: 0, y: 50 }}   // Fade out and slide down when hiding
+          className="fixed bottom-8 right-8 bg-card/80 p-4 rounded-lg border shadow-lg w-64"
+        >
+          {/* Speed display */}
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-semibold text-lg">Vehicle Info</h3>
+            <div className="flex items-center gap-1">
+              <LibIcon icon="gauge-high" className="text-primary" />
+              <span className="text-xl font-bold">{vehicleData.speed}</span>
+              <span className="text-xs text-muted-foreground">km/h</span>
+            </div>
+          </div>
+          
+          {/* Fuel gauge */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <LibIcon icon="gas-pump" className="text-amber-500" />
+              <div className="flex-1">
+                <Progress 
+                  value={vehicleData.fuel} 
+                  className="h-2" 
+                />
+              </div>
+              <span className="text-xs">{Math.round(vehicleData.fuel)}%</span>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+export default VehicleHUD;
+```
+
+> 💡 **Tip**: The component uses Tailwind CSS for styling. Classes like `bg-card/80` create a semi-transparent background, and `shadow-lg` adds a nice shadow effect.
+```
+
+#### Step 3: Add the Component to App.tsx
+
+Finally, import and add your VehicleHUD component to your main App component:
+
+```tsx
+import VehicleHUD from '@/components/VehicleHUD';
+
+const App = () => {
+  // Existing code...
+  
+  return (
+    <>
+      {/* Existing UI components */}
+      <VehicleHUD />
+    </>
+  );
+};
+```
+
+Now when you enter a vehicle in-game, the HUD will automatically appear and display your speed and fuel level!
+
+### Using FontAwesome Icons
+
+The boilerplate includes FontAwesome icons that you can use with the `LibIcon` component:
+
+```tsx
+import LibIcon from '@/components/LibIcon';
+
+const IconExamples = () => {
+  return (
+    <div className="grid grid-cols-2 gap-4 p-4">
+      <div className="flex items-center gap-2">
+        <LibIcon icon="user" className="text-primary" />
+        <span>Regular Icon</span>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <LibIcon icon="bell" animation="shake" className="text-amber-500" />
+        <span>Animated Icon (Shake)</span>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <LibIcon icon="spinner" animation="spin" className="text-blue-500" />
+        <span>Animated Icon (Spin)</span>
+      </div>
+      
+      <div className="flex items-center gap-2">
+        <LibIcon icon={['fab', 'discord']} className="text-indigo-500" />
+        <span>Brand Icon (Discord)</span>
+      </div>
+    </div>
+  );
+};
+```
+
+### Using Framer Motion for Animations
+
+The boilerplate includes Framer Motion for creating smooth animations:
+
+```tsx
+import { motion } from 'framer-motion';
+
+const AnimatedCard = () => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+      whileHover={{ scale: 1.02 }}
+      className="bg-card p-4 rounded-lg shadow-md"
+    >
+      <h3 className="font-medium mb-2">Animated Card</h3>
+      <p className="text-muted-foreground">This card animates on load and hover.</p>
+    </motion.div>
+  );
+};
+```
+
+### Best Practices
+
+1. **Performance Optimization**
+   - Use React's `useMemo` and `useCallback` for expensive calculations or functions
+   - Implement proper dependency arrays in `useEffect` hooks
+   - Minimize state updates during animations
+
+2. **Error Handling**
+   - Always wrap NUI calls in try/catch blocks
+   - Provide fallback UI for error states
+   - Use the built-in ErrorBoundary for catching React errors
+
+3. **Responsive Design**
+   - Use TailwindCSS responsive modifiers (sm:, md:, lg:) for different screen sizes
+   - Test your UI at various resolutions
+   - Consider different aspect ratios common in FiveM servers
+
+4. **Code Organization**
+   - Keep components small and focused on a single responsibility
+   - Use custom hooks to share logic between components
+   - Organize related files in appropriate directories

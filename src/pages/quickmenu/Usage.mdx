@@ -1,0 +1,417 @@
+---
+title: Usage
+---
+
+import { Callout } from 'nextra/components';
+
+# Usage
+
+This page covers how to effectively use the `err_quickmenu` system, including basic operations, advanced features, and troubleshooting.
+
+## Opening the Menu
+
+### Default Keybind
+- **F1** - Opens the radial menu (configurable in `config/client.lua`)
+
+### Menu Behavior
+- **Toggle Mode** (default): Hold F1 to keep menu open, release to close
+- **Click Mode**: Press F1 once to open, press again to close
+
+## Basic Menu Navigation
+
+### Menu Structure
+The radial menu is organized in a hierarchical structure:
+
+1. **Main Categories** - Citizen, General, Vehicle, etc.
+2. **Sub-Categories** - Interaction, Tools, etc.
+3. **Actions** - Specific functions like "Cuff Player", "Repair Vehicle"
+
+### Navigation Controls
+- **Mouse Movement** - Hover over menu items
+- **Left Click** - Select menu item
+- **Mouse Wheel** - Navigate through sub-menus
+- **Escape Key** - Close menu
+
+## Adding Dynamic Options
+
+### Using the Point System
+
+The most common way to add dynamic options is using the ox_lib point system:
+
+```lua
+-- Create a point at a specific location
+local point = lib.points.new(vector3(100, 200, 30), 5.0)
+
+function point:onEnter()
+    -- Add options when player enters the zone
+    exports['err_quickmenu']:addOption({
+        id = 'zone_action',
+        label = 'Zone Action',
+        icon = 'map-marker',
+        onSelect = function()
+            print('Zone action executed!')
+        end
+    })
+end
+
+function point:onExit()
+    -- Remove options when player leaves the zone
+    exports['err_quickmenu']:removeOption('zone_action')
+end
+```
+
+### Adding Options Programmatically
+
+You can also add options based on game events or conditions:
+
+```lua
+-- Add options when player enters a vehicle
+AddEventHandler('baseevents:enteredVehicle', function()
+    exports['err_quickmenu']:addOption({
+        id = 'vehicle_action',
+        label = 'Vehicle Action',
+        icon = 'car',
+        onSelect = function()
+            print('Vehicle action executed!')
+        end
+    })
+end)
+
+-- Remove when exiting vehicle
+AddEventHandler('baseevents:leftVehicle', function()
+    exports['err_quickmenu']:removeOption('vehicle_action')
+end)
+```
+
+## Menu Item Types
+
+### Action Types
+
+Each menu item can perform different types of actions:
+
+#### 1. Function Execution
+```lua
+{
+    id = 'function_example',
+    label = 'Execute Function',
+    icon = 'play',
+    onSelect = function()
+        -- Your custom logic here
+        print('Function executed!')
+    end
+}
+```
+
+#### 2. Client Events
+```lua
+{
+    id = 'client_event',
+    label = 'Trigger Client Event',
+    icon = 'bolt',
+    event = 'myresource:clientAction',
+    args = { param1 = 'value1' }
+}
+```
+
+#### 3. Server Events
+```lua
+{
+    id = 'server_event',
+    label = 'Trigger Server Event',
+    icon = 'server',
+    serverEvent = 'myresource:serverAction',
+    args = 'parameter'
+}
+```
+
+#### 4. Commands
+```lua
+{
+    id = 'command_example',
+    label = 'Execute Command',
+    icon = 'terminal',
+    command = 'me',
+    args = 'Hello World!'
+}
+```
+
+### Conditional Items
+
+Make menu items appear only under certain conditions:
+
+```lua
+{
+    id = 'conditional_item',
+    label = 'Conditional Option',
+    icon = 'check',
+    enable = function()
+        -- Return true/false based on conditions
+        return IsPlayerInVehicle() and GetPlayerJob() == 'police'
+    end,
+    onSelect = function()
+        print('Condition met!')
+    end
+}
+```
+
+## Vehicle Controls
+
+### Automatic Vehicle Detection
+
+When `enableVehicleSeats` is enabled, the system automatically detects the vehicle and adds appropriate controls:
+
+- **Seats**: Dynamic seat switching based on vehicle model
+- **Doors**: All 6 door positions (driver, passenger, back left, back right, hood, trunk)
+- **Windows**: 4 window positions with toggle functionality
+- **Extras**: Up to 13 vehicle extras
+
+### Vehicle Menu Structure
+
+```
+Vehicle
+├── Vehicle Seats
+│   ├── Driver's Seat
+│   ├── Passenger's Seat
+│   ├── Rear Left Seat
+│   └── Rear Right Seat
+├── Vehicle Doors
+│   ├── Driver's Door
+│   ├── Passenger's Door
+│   ├── Back Left Door
+│   ├── Back Right Door
+│   ├── Hood
+│   └── Trunk
+├── Vehicle Windows
+│   ├── Driver's Window
+│   ├── Passenger's Window
+│   ├── Back Left Window
+│   └── Back Right Window
+└── Vehicle Extras
+    ├── Extra 1
+    ├── Extra 2
+    └── ... (up to Extra 13)
+```
+
+## Job and Gang Integration
+
+### Job-Based Menus
+
+Job-specific menus automatically appear when:
+- Player has the corresponding job
+- Player is on duty
+- Job is configured in `config/client.lua`
+
+```lua
+-- In config/client.lua
+jobItems = {
+    police = {
+        {
+            id = 'police_radar',
+            label = 'Speed Radar',
+            icon = 'tachometer-alt',
+            onSelect = function()
+                print('Police radar activated!')
+            end
+        }
+    }
+}
+```
+
+### Gang-Based Menus
+
+Similar to job menus, gang menus appear for gang members:
+
+```lua
+-- In config/client.lua
+gangItems = {
+    lostmc = {
+        {
+            id = 'gang_action',
+            label = 'Gang Action',
+            icon = 'skull',
+            onSelect = function()
+                print('Gang action executed!')
+            end
+        }
+    }
+}
+```
+
+## Advanced Features
+
+### Sub-Menu Registration
+
+Add sub-items to existing menu options:
+
+```lua
+-- First, add the parent menu
+exports['err_quickmenu']:addOption({
+    id = 'parent_menu',
+    label = 'Parent Menu',
+    icon = 'folder'
+})
+
+-- Then register sub-items
+exports['err_quickmenu']:registerSubItems('parent_menu', {
+    {
+        id = 'sub_item1',
+        label = 'Sub Item 1',
+        icon = 'circle',
+        onSelect = function()
+            print('Sub item 1 selected!')
+        end
+    },
+    {
+        id = 'sub_item2',
+        label = 'Sub Item 2',
+        icon = 'dot-circle',
+        onSelect = function()
+            print('Sub item 2 selected!')
+        end
+    }
+})
+```
+
+### Menu State Management
+
+Monitor and control the menu state:
+
+```lua
+-- Get current menu state
+local state = exports['err_quickmenu']:getRadialMenuState()
+print('Menu open:', state.open)
+print('Menu disabled:', state.disabled)
+print('Dynamic options:', state.runtimeCount)
+print('Total menus:', state.total)
+
+-- Temporarily disable the menu
+exports['err_quickmenu']:disableRadialMenu(true)
+
+-- Re-enable after a delay
+CreateThread(function()
+    Wait(5000) -- 5 seconds
+    exports['err_quickmenu']:disableRadialMenu(false)
+end)
+```
+
+### Performance Optimization
+
+#### Efficient Point Management
+```lua
+-- Use appropriate radii to avoid overlapping points
+local point = lib.points.new(vector3(100, 200, 30), 5.0) -- 5.0 radius
+
+-- Avoid creating too many points in the same area
+-- Consider using a single point with multiple options instead
+```
+
+#### Batch Operations
+```lua
+-- Add multiple options at once instead of one by one
+exports['err_quickmenu']:addOption({
+    {
+        id = 'option1',
+        label = 'Option 1',
+        icon = 'star'
+    },
+    {
+        id = 'option2',
+        label = 'Option 2',
+        icon = 'heart'
+    }
+})
+```
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Menu Not Opening
+- Check if the resource is started
+- Verify the keybind configuration
+- Ensure no other resources are blocking the key
+
+#### 2. Options Not Appearing
+- Check if the export is being called correctly
+- Verify the option structure is valid
+- Ensure the `id` field is unique
+
+#### 3. Vehicle Controls Not Working
+- Verify vehicle feature flags are enabled in config
+- Check if the player is actually in a vehicle
+- Ensure the vehicle events are properly configured
+
+#### 4. Performance Issues
+- Reduce point radii to avoid overlapping
+- Limit the number of dynamic options
+- Use conditional items instead of adding/removing frequently
+
+### Debug Information
+
+Enable debug output to troubleshoot issues:
+
+```lua
+-- Check if the export is available
+if GetResourceState('err_quickmenu') == 'started' then
+    print('err_quickmenu is available')
+else
+    print('err_quickmenu is not available')
+end
+
+-- Check menu state
+local state = exports['err_quickmenu']:getRadialMenuState()
+print('Menu state:', json.encode(state))
+```
+
+### Error Handling
+
+Always handle cases where the menu might not be available:
+
+```lua
+local function safeAddOption(option)
+    if GetResourceState('err_quickmenu') == 'started' then
+        exports['err_quickmenu']:addOption(option)
+        return true
+    else
+        print('err_quickmenu is not available')
+        return false
+    end
+end
+
+-- Use the safe function
+safeAddOption({
+    id = 'safe_option',
+    label = 'Safe Option',
+    icon = 'shield'
+})
+```
+
+## Best Practices
+
+### 1. Resource Management
+- Always clean up options when your resource stops
+- Use unique IDs to avoid conflicts
+- Remove options when they're no longer needed
+
+### 2. Performance
+- Use appropriate point radii
+- Avoid adding/removing options every frame
+- Use conditional items for dynamic content
+
+### 3. User Experience
+- Provide clear, descriptive labels
+- Use appropriate icons for each action
+- Group related options together
+
+### 4. Integration
+- Use events for server-client communication
+- Keep your resource independent of the menu system
+- Provide fallbacks when the menu is unavailable
+
+<Callout type="info">
+The err_quickmenu system is designed to be intuitive and easy to use while providing powerful customization options.
+</Callout>
+
+<Callout type="warning">
+Always test your menu configurations thoroughly and ensure proper cleanup to maintain server performance.
+</Callout>

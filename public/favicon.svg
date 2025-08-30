@@ -1,0 +1,7 @@
+<svg width="1080" height="1080" viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg">
+  <!-- Round outer black shape (filled circle) -->
+  <circle cx="540" cy="540" r="520" fill="#000000"/>
+  
+  <!-- Inner white square -->
+  <rect x="340" y="340" width="400" height="400" fill="#ffffff"/>
+</svg>

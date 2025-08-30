@@ -1,0 +1,299 @@
+---
+title: Configuration
+---
+
+import { Callout } from 'nextra/components';
+
+# Configuration
+
+The `err_quickmenu` system is highly configurable through the `config/client.lua` file. This page covers all available configuration options and their usage.
+
+## Basic Configuration
+
+### Keybind Settings
+
+```lua
+return {
+    -- Keybind for opening the radial menu
+    keyBind = 'f1',
+
+    -- Enable toggle for the radialmenu
+    toggle = true,
+}
+````
+
+**Options:**
+
+* **`keyBind`**: The key to open the radial menu (default: `'f1'`)
+* **`toggle`**: Whether the menu should stay open until pressed again (default: `true`)
+
+---
+
+## UI Settings
+
+### Quick Menu Scrolling
+
+```lua
+uiSettings = {
+    quickmenuSettings = {
+        allowPageScroll = true,      -- Enable switching pages using scroll
+        loopScrollWithinPage = false,-- Allow continuous scrolling inside a page (wrap around)
+        scrollDelay = 120,           -- Time (ms) before next scroll (prevents over-scrolling)
+    },
+}
+```
+
+**Options:**
+
+* **`allowPageScroll`**: Allows using mouse wheel to switch between menu pages.
+* **`loopScrollWithinPage`**: If `true`, scrolling loops through items infinitely.
+* **`scrollDelay`**: Adds a delay between scroll inputs to avoid skipping.
+
+### Item Label Position
+
+```lua
+itemLabel = {
+    position = 'center' -- top | center | bottom
+}
+```
+
+* **`position`**: Controls where the label for a selected item appears on the radial menu.
+
+### Colors
+
+```lua
+colors = {
+    primaryWhite = '#f8f8f8',
+    secondaryWhite = '#ffffffb6',
+    selectedGradient = '#f8f8f8',
+    selectedTextColor = '#000000',
+    bottomTextColor = '#ffffff'
+}
+```
+
+**Options:**
+
+* **`primaryWhite`**: Main white color for the menu.
+* **`secondaryWhite`**: Subtle secondary white for borders/backgrounds.
+* **`selectedGradient`**: Highlight background for selected item.
+* **`selectedTextColor`**: Text color for selected item.
+* **`bottomTextColor`**: Text color at the bottom of the UI.
+
+---
+
+## Vehicle Features
+
+```lua
+-- Enable extra menu functionality
+enableVehicleDoors = true,
+enableVehicleWindows = true,
+enableVehicleSeats = true,
+enableVehicleExtras = true,
+```
+
+* **`enableVehicleDoors`**: Enable vehicle door controls
+* **`enableVehicleWindows`**: Enable vehicle window controls
+* **`enableVehicleSeats`**: Enable vehicle seat switching
+* **`enableVehicleExtras`**: Enable vehicle extra toggles
+
+---
+
+## Menu Structure
+
+### Main Menu Items
+
+```lua
+menuItems = {
+    {
+        id = 'citizen',
+        icon = 'user',
+        label = 'Citizen',
+        items = {
+            {
+                id = 'interactions',
+                icon = 'hands-helping',
+                label = 'Interaction',
+                items = {
+                    {
+                        id = 'handcuff',
+                        icon = 'lock',
+                        label = 'Cuff',
+                        serverEvent = 'police:server:CuffPlayer',
+                        args = '2w2'
+                    },
+                    {
+                        id = 'playerInVehicle',
+                        icon = 'truck',
+                        label = 'Put In Vehicle',
+                        command = 'me',
+                        args = 'Test "ME" from quick menu'
+                    },
+                    ...
+                }
+            }
+        }
+    }
+}
+```
+
+**Item Properties:**
+
+* **`id`**: Unique identifier
+* **`icon`**: FontAwesome icon
+* **`label`**: Display text
+* **`items`**: Nested sub-items
+* **`event` / `serverEvent` / `command` / `onSelect`**: Defines action type
+* **`args`**: Arguments passed to the action
+
+---
+
+## Job-Based Menus
+
+Job-specific menus only appear when the player **has the given job**.  
+For example, the entries under `police` will only show up for players whose job is set to `"police"`.
+
+```lua
+jobItems = {
+    police = {
+        {
+            id = 'policeObjects',
+            icon = 'shield-alt',
+            label = 'Police Objects',
+            onSelect = function()
+                print('Police Objects')
+            end,
+        },
+    },
+
+    ambulance = {
+        {
+            id = 'statusCheck',
+            icon = 'medkit',
+            label = 'Check Health Status',
+            onSelect = function()
+                print('Ambulance: Check Health Status')
+            end,
+        },
+    },
+
+    mechanic = {
+        {
+            id = 'repairVehicle',
+            icon = 'tools',
+            label = 'Repair Vehicle',
+            onSelect = function()
+                print('Mechanic: Repair Vehicle')
+            end,
+        },
+    },
+
+    taxi = {
+        {
+            id = 'npcMission',
+            icon = 'map-marker',
+            label = 'NPC Mission',
+            onSelect = function()
+                print('Taxi: NPC Mission')
+            end,
+        },
+    },
+
+    tow = {
+        {
+            id = 'towVehicle',
+            icon = 'truck-monster',
+            label = 'Tow Vehicle',
+            onSelect = function()
+                print('Tow: Tow Vehicle')
+            end,
+        },
+    },
+}
+````
+
+<Callout type="info">
+    <b>Job Restriction:</b>  
+    Use `"police"`, `"tow"`, `"ambulance"`, `"mechanic"`, `"taxi"`, etc. → Only players with that job will see the menu.
+</Callout>
+
+---
+
+## Gang-Based Menus
+
+Gang menus work the same way as job menus, but are tied to **gang affiliations** instead of jobs.
+In this example, only players in the `"lostmc"` gang will see the menu.
+
+```lua
+gangItems = {
+    lostmc = {
+        {
+            id = 'gang',
+            icon = 'skull',
+            label = 'Gang Lost MC',
+            onSelect = function()
+                print('Gang Lost MC')
+            end,
+        },
+    }
+}
+```
+
+<Callout type="info">
+  <b>Gang Restriction:</b><br/><br/>
+  • Use <code>"ballas"</code>, <code>"vagos"</code>, <code>"families"</code>, etc. → Only players in that <b>gang</b> will see the menu.
+</Callout>
+
+---
+
+## Vehicle Controls
+
+Vehicle **Doors, Windows, Seats, Extras** are fully supported (see full example below).
+
+* **`vehicleDoors`** → open/close doors/hood/trunk
+* **`vehicleWindows`** → roll up/down windows
+* **`vehicleSeats`** → dynamically generated seat switching
+* **`vehicleExtras`** → toggle vehicle extras (lights, sirens, etc.)
+
+---
+
+## Complete Example
+
+At the end, the whole file comes together like this:
+
+```lua
+return {
+    keyBind = 'f1',
+    toggle = true,
+
+    enableVehicleDoors = true,
+    enableVehicleWindows = true,
+    enableVehicleSeats = true,
+    enableVehicleExtras = true,
+
+    uiSettings = {
+        quickmenuSettings = {
+            allowPageScroll = true,
+            loopScrollWithinPage = false,
+            scrollDelay = 120,
+        },
+        itemLabel = {
+            position = 'center'
+        },
+        colors = {
+            primaryWhite = '#f8f8f8',
+            secondaryWhite = '#ffffffb6',
+            selectedGradient = '#f8f8f8',
+            selectedTextColor = '#000000',
+            bottomTextColor = '#ffffff'
+        },
+    },
+
+    menuItems = { ... },
+    jobItems = { ... },
+    gangItems = { ... },
+    vehicleDoors = { ... },
+    vehicleWindows = { ... },
+    vehicleSeats = { ... },
+    vehicleExtras = { ... }
+}
+```

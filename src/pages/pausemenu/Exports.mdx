@@ -1,0 +1,41 @@
+---
+title: Exports
+---
+
+# Exports
+
+Nil's Pausemenu provides several exports that allow other resources to interact with the pause menu functionality.
+
+## Available Exports
+
+### getPauseMenuState
+
+This export allows you to check if the pause menu is currently active or not.
+
+```lua
+-- Returns: boolean (true if pause menu is open, false if closed)
+local isPauseMenuOpen = exports['nil-pausemenu']:getPauseMenuState()
+```
+
+## Implementation Example
+
+Here's how you can use the `getPauseMenuState` export in your own resource:
+
+```lua
+-- client.lua
+
+-- Check if pause menu is open before performing an action
+RegisterCommand('my_command', function()
+    local isPauseMenuOpen = exports['nil-pausemenu']:getPauseMenuState()
+    
+    if isPauseMenuOpen then
+        -- Pause menu is open, handle accordingly
+        print('Cannot execute command while pause menu is open')
+        return
+    end
+    
+    -- Continue with command execution
+    print('Command executed successfully')
+    -- Your command logic here...
+end, false)
+```

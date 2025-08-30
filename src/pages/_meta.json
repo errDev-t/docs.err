@@ -1,0 +1,19 @@
+{
+  "index": "Introduction",
+  "###": {
+    "type": "separator"
+  },
+  "quickmenu": "Quickmenu",
+  "pausemenu": "Pausemenu",
+  "boilerplate": "Boilerplate",
+  "about": {
+    "title": "About",
+    "type": "page"
+  },
+  "contact": {
+    "title": "Contact ↗",
+    "type": "page",
+    "href": "https://x.com",
+    "newWindow": true
+  }
+}

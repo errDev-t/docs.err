@@ -1,0 +1,157 @@
+---
+title: Configuration
+---
+
+## Config
+
+Below is a breakdown of all available configuration options for the Nil's Pausemenu resource.
+
+### UI Appearance
+
+- `PrimaryColor`
+  - Default: `{255, 129, 25}`
+  - Sets the main color of the UI using RGB format.
+
+- `GtaUiColor`
+  - Customizes the colors of various GTA UI elements:
+  - `Primary` - Default: `{255, 129, 25, 255}` - Main UI elements color (R,G,B,A)
+  - `Background` - Default: `{0, 0, 0, 186}` - Pause menu background color (R,G,B,A)
+  - `Waypoint` - Default: `{164, 76, 242, 255}` - Map waypoint color (R,G,B,A)
+
+### General Settings
+
+- `UseKeybinds`
+  - Default: `true`
+  - Enables or disables the use of keybinds for quick menu access.
+
+### Keybinds
+
+- `Settings`
+  - Default: `"N"`
+  - Key to open the Settings Menu.
+  
+- `Map`
+  - Default: `"M"`
+  - Key to open the Map.
+
+### Camera
+
+- `Camera`
+  - Default: `true`
+  - Enables smooth camera animation when opening the pause menu.
+
+### Welcome Message
+
+- `Welcome`
+  - Default: `"<p>@</p> Welcome! Enjoy your time in the city. <p>Test Color</p>"`
+  - Message displayed under the scoreboard when players open the menu.
+  - Supports HTML tags with color attributes for styling.
+
+### Camera Mode / Rockstar Editor
+
+- `CameraModeEvent`
+  - Default: `'a5-cameramode:client:OpenCameraMode'`
+  - Event name triggered when players enter camera/photo mode (default "F" key).
+
+- `RockstarEditorEvent`
+  - Default: `"example:example:example"`
+  - Event or command name used to open the Rockstar Editor.
+
+- `ReportEvent`
+  - Event name triggered when players click the Report button (if configured).
+
+### Sections
+
+The pausemenu supports up to two custom section buttons. Each section has the following properties:
+
+- `title`
+  - Sets the display name of the button.
+  
+- `icon`
+  - FontAwesome icon class to use.
+  
+- `iconStyle`
+  - CSS styling for positioning and appearance of the icon.
+  
+- `background`
+  - Background color for the button (supports hex with alpha).
+  
+- `type`
+  - Can be one of the following:
+    - `'url'` - Opens external link
+    - `'event'` - Triggers client event
+    - `'export'` - Calls a client-side export function
+  
+- `trigger`
+  - Based on the type:
+    - For `url`: The URL to open
+    - For `event`: The event name to trigger
+    - For `export`: The export to call in format 'resourceName.exportName'
+
+### Patch Notes
+
+The `Patches` section displays update information to players. Each patch entry requires:
+
+- `title`
+  - The name of the update or feature.
+  
+- `image`
+  - URL to an image showcasing the update.
+
+You can add as many patch versions as needed by incrementing the index number.
+
+### Example Configuration
+
+```lua
+return {
+    PrimaryColor = {255, 129, 25},
+    UseKeybinds = true,
+    Settings = "N",
+    Map = "M",
+    Camera = true,
+    Welcome = "<p>@</p> Welcome! Enjoy your time in the city. <p>Test Color</p>",
+    CameraModeEvent = 'a5-cameramode:client:OpenCameraMode',
+    RockstarEditorEvent = "example:example:example",
+    
+    GtaUiColor = {
+        Primary = {255, 129, 25, 255},      -- Main UI elements color (R,G,B,A)
+        Background = {0, 0, 0, 186},        -- Pause menu background color (R,G,B,A)
+        Waypoint = {164, 76, 242, 255},     -- Map waypoint color (R,G,B,A)
+    },
+    
+    Sections = {
+        {
+            title = 'Discord',
+            icon = 'fa-brands fa-discord',
+            iconStyle = [[position: absolute; font-size: 10vh; transform: rotate(15deg); opacity: 0.5; right: 0; bottom: 0;]],
+            background = '#7289da53',
+            type = 'url',
+            trigger = 'https://discord.gg/qGQNRFMAAG'
+        },
+        {
+            title = 'Report',
+            icon = 'fa-solid fa-triangle-exclamation',
+            iconStyle = [[position: absolute; font-size: 10vh; transform: rotate(-15deg); opacity: 0.3; left: 0; top: 0;]],
+            background = '#0000004d',
+            type = 'export',
+            trigger = 'nil-pausemenu.getPauseMenuState'  -- Format: 'resourceName.exportName'
+        },
+    },
+    
+    Patches = {
+        ['1'] = {
+            {
+                title = 'New Pause Menu!',
+                image = 'https://cdn.discordapp.com/attachments/924643992166101053/1341257700553785416/image-enhanced_1.png'
+            }
+        },
+        ['2'] = {
+            {
+                title = 'New Chat System!',
+                image = 'https://cdn.discordapp.com/attachments/924643992166101053/1340074169911738509/image.png'
+            }
+        },
+        -- Additional patches...
+    },
+}
+```
