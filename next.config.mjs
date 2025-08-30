@@ -5,6 +5,21 @@ const withNextra = nextra({
   themeConfig: './src/theme.config.tsx',
 })
 
-export default withNextra({
-  // Add any other Next.js config options here
-})
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  async headers() {
+    return [
+      {
+        // Apply to all routes
+        source: '/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
+        ],
+      },
+    ]
+  },
+}
+
+export default withNextra(nextConfig)
