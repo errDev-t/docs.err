@@ -2,17 +2,16 @@ import React from 'react'
 import {DocsThemeConfig, ThemeSwitch, useConfig} from "nextra-theme-docs";
 import { useRouter } from 'next/router'
 
-const BRAND_NAME = process.env.NEXT_PUBLIC_BRAND_NAME || "Err";
 const ORGANIZATION_NAME = process.env.NEXT_PUBLIC_ORZANIZATION_NAME || "errDev-t";
 const REPO = "https://github.com/errDev-t/docs.err"
 
 const config: DocsThemeConfig = {
-  logo: <span>{BRAND_NAME}</span>,
+  logo: <img src="/ERRLOGO.png" alt="err logo" width="48" height="44" />,
   project: {
     link: REPO,
   },
   chat: {
-    link: 'https://discord.gg/yGUU59WjuM',
+    link: 'https://dsc.gg/errdev',
   },
   docsRepositoryBase: 'https://github.com',
   toc: {
@@ -44,7 +43,7 @@ const config: DocsThemeConfig = {
           type: 'image/svg+xml',
         }
       ],
-      title: asPath !== '/' ? `${pageTitle} - ${BRAND_NAME}` : BRAND_NAME,
+      title: asPath !== '/' ? `${pageTitle} - errDev-t` : 'errDev-t',
     }
   },
 }
