@@ -3,8 +3,44 @@ title: Pausemenu
 sidebarTitle: Pausemenu
 ---
 
-{/* Overview for Pausemenu. Replace with your original page content if needed. */}
+import { Steps, Tabs, Tab } from 'nextra-theme-docs';
+import { Callout } from 'nextra/components';
 
-# Pausemenu
+# Nil's Pausemenu
 
-This is the Pausemenu overview. Use the sidebar for configuration and exports.
+A modern and customizable pause menu replacement for FiveM servers, providing a sleek interface with various features.
+
+## Purchase
+
+You can get this script from the [ERR Tebex-store](https://err.tebex.io/package/6685111)
+
+## Installation
+
+<Callout type="info">
+Make sure to follow the installation instructions carefully to ensure proper functionality.
+</Callout>
+
+<Steps>
+### Install dependencies
+- [ox_lib](https://github.com/overextended/ox_lib)
+
+### Add to Server Resources
+- Extract the nil-pausemenu folder from the downloads folder
+- Place the nil-pausemenu folder into a new [ERR] directory within your server's resources folder
+
+### Update Server Configuration
+Open your server.cfg file and add one of the following lines:
+
+<Tabs items={['ensure', 'start']}>
+  <Tab>
+  ```cfg
+  ensure [ERR]
+  ```
+  </Tab>
+  <Tab>
+  ```cfg
+  start [ERR]
+  ```
+  </Tab>
+</Tabs>
+</Steps>

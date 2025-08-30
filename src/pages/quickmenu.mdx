@@ -3,8 +3,51 @@ title: Quickmenu
 sidebarTitle: Quickmenu
 ---
 
-{/* Overview for Quickmenu. Replace with your original page content if needed. */}
+import { Steps, Tabs, Tab } from 'nextra-theme-docs';
+import { Callout } from 'nextra/components';
 
 # Quickmenu
 
-This is the Quickmenu overview. Use the sidebar for configuration, usage, exports, and examples.
+A redesigned and modern FiveM radial menu system that provides an intuitive and customizable interface for quick actions and interactions.
+
+## Purchase
+
+You can get this script from the [ERR store](https://www.err.cool/package/7002128)
+
+## Installation
+
+<Callout type="info">
+Make sure to follow the installation instructions carefully to ensure proper functionality.
+</Callout>
+
+<Steps>
+### Install dependencies
+- [ox_lib](https://github.com/overextended/ox_lib)
+
+### Add to Server Resources
+
+* Extract the `err_quickmenu` folder from the downloads folder
+* Place the `err_quickmenu` folder into a new `[ERR]` directory within your server's `resources` folder
+
+### Update Server Configuration
+
+Open your `server.cfg` file and add one of the following lines:
+
+<Tabs items={['ensure', 'start']}> <Tab>
+
+```cfg
+ensure [ERR]
+```
+
+  </Tab>
+  <Tab>
+  ```cfg
+  start [ERR]
+  ```
+  </Tab>
+</Tabs>
+</Steps>
+
+<Callout type="warning">
+This resource requires **ox_lib** as a dependency — ensure `ox_lib` is started/ensured before `err_quickmenu` in your `server.cfg`.
+</Callout>
