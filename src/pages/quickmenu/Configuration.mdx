@@ -10,8 +10,6 @@ The `err_quickmenu` system is highly configurable through the `config/client.lua
 
 ## Basic Configuration
 
-### Keybind Settings
-
 ```lua
 return {
     -- Keybind for opening the radial menu
@@ -19,6 +17,9 @@ return {
 
     -- Enable toggle for the radialmenu
     toggle = true,
+
+    -- Automatically close the menu when an item is clicked
+    closeOnClick = true,
 }
 ````
 
@@ -26,6 +27,7 @@ return {
 
 * **`keyBind`**: The key to open the radial menu (default: `'f1'`)
 * **`toggle`**: Whether the menu should stay open until pressed again (default: `true`)
+* **`closeOnClick`**: If `true`, the radial menu will automatically close when any item is clicked. If `false`, the menu stays open.
 
 ---
 

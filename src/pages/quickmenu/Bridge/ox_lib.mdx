@@ -1,0 +1,112 @@
+---
+title: Ox Lib
+---
+
+import { Callout } from 'nextra/components';
+
+# Radial Bridge
+
+**File path:**  
+`ox_lib/resource/interface/client/radial.lua`
+
+This file replaces ox_lib’s original **radial implementation** and redirects all functions to the custom [`err_quickmenu`](../) system.  
+
+It works as a **bridge**:  
+- Scripts that depend on `ox_lib` radial functions (`lib.addRadialItem`, `lib.removeRadialItem`, etc.) will continue to work.  
+- Instead of ox_lib’s built-in radial, they will now use `err_quickmenu`.  
+
+---
+
+## Replacement Code
+
+```lua
+--[[
+    https://github.com/overextended/ox_lib
+
+    This file is licensed under LGPL-3.0 or higher <https://www.gnu.org/licenses/lgpl-3.0.en.html>
+
+    Copyright © 2025 Linden <https://github.com/thelindat>
+]]
+
+---Registers a radial sub menu with predefined options.
+---@param radial RadialMenuProps
+function lib.registerRadial(radial)
+    -- Using custom export instead of lib function
+    exports['err_quickmenu']:registerSubItems(radial.id, radial.items)
+end
+
+---Registers an item or array of items in the global radial menu.
+---@param items RadialMenuItem | RadialMenuItem[]
+function lib.addRadialItem(items)
+    -- Using custom export instead of lib function
+    exports['err_quickmenu']:addOption(items)
+end
+
+function lib.getCurrentRadialId()
+    local state = exports['err_quickmenu']:getRadialMenuState()
+    return state.currentRadialId
+end
+
+function lib.hideRadial()
+    -- Using custom export instead of lib function
+    exports['err_quickmenu']:CloseMenu()
+end
+
+---Removes an item from the global radial menu with the given id.
+---@param id string
+function lib.removeRadialItem(id)
+    -- Using custom export instead of lib function
+    exports['err_quickmenu']:removeOption(id)
+end
+
+---Removes all items from the global radial menu.
+function lib.clearRadialItems()
+    -- Using custom export instead of lib function
+    exports['err_quickmenu']:clearRadialItems()
+end
+
+---Disallow players from opening the radial menu.
+---@param state boolean
+function lib.disableRadial(state)
+    -- Using custom export instead of lib function
+    exports['err_quickmenu']:disableRadialMenu(state)
+end
+````
+
+---
+
+## Comparison Table
+
+| ox\_lib Function         | Redirected Export                                    |
+| ------------------------ | ---------------------------------------------------- |
+| `lib.registerRadial`     | `err_quickmenu:registerSubItems`                     |
+| `lib.addRadialItem`      | `err_quickmenu:addOption`                            |
+| `lib.getCurrentRadialId` | `err_quickmenu:getRadialMenuState().currentRadialId` |
+| `lib.hideRadial`         | `err_quickmenu:CloseMenu`                            |
+| `lib.removeRadialItem`   | `err_quickmenu:removeOption`                         |
+| `lib.clearRadialItems`   | `err_quickmenu:clearRadialItems`                     |
+| `lib.disableRadial`      | `err_quickmenu:disableRadialMenu`                    |
+
+---
+
+## Installation
+
+1. Navigate to your **ox\_lib** resource.
+2. Replace the file:
+
+   ```
+   ox_lib/resource/interface/client/radial.lua
+   ```
+
+   with the code above.
+3. Restart your server.
+
+Now all radial functions from `ox_lib` are seamlessly bridged to `err_quickmenu`.
+
+---
+
+<Callout>
+  <b>Summary:</b>
+  This file makes your scripts think they are using <code>ox_lib</code>’s radial menu, 
+  but behind the scenes, everything runs through <code>err_quickmenu</code>.
+</Callout>
