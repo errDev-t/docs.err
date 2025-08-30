@@ -2,13 +2,12 @@ import React from 'react'
 import {DocsThemeConfig, ThemeSwitch, useConfig} from "nextra-theme-docs";
 import { useRouter } from 'next/router'
 
-const ORGANIZATION_NAME = process.env.NEXT_PUBLIC_ORZANIZATION_NAME || "errDev-t";
-const REPO = "https://github.com/errDev-t/docs.err"
+const ORGANIZATION_NAME = 'errDev-t';
 
 const config: DocsThemeConfig = {
   logo: <img src="/ERRLOGO.png" alt="err logo" width="48" height="44" />,
   project: {
-    link: REPO,
+    link: 'https://github.com/errDev-t/docs.err',
   },
   chat: {
     link: 'https://dsc.gg/errdev',
