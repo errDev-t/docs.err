@@ -33,23 +33,34 @@ return {
 
 ## UI Settings
 
-### Quick Menu Scrolling
+### Quick Menu Input & Scrolling
 
 ```lua
 uiSettings = {
     quickmenuSettings = {
-        allowPageScroll = true,      -- Enable switching pages using scroll
-        loopScrollWithinPage = false,-- Allow continuous scrolling inside a page (wrap around)
-        scrollDelay = 120,           -- Time (ms) before next scroll (prevents over-scrolling)
+        inputMode = {
+            cursor = false, -- Enable cursor-based navigation
+            scroll = true,  -- Enable mouse-wheel navigation
+        },
+
+        scroll = {
+            allowPageScroll = true,      -- Enable switching pages using scroll
+            loopScrollWithinPage = false,-- Allow continuous scrolling inside a page (wrap around)
+            scrollDelay = 120,           -- Time (ms) before next scroll, prevents over-scrolling
+        },
     },
 }
 ```
 
 **Options:**
 
-* **`allowPageScroll`**: Allows using mouse wheel to switch between menu pages.
-* **`loopScrollWithinPage`**: If `true`, scrolling loops through items infinitely.
-* **`scrollDelay`**: Adds a delay between scroll inputs to avoid skipping.
+* **`inputMode.cursor`**: Enable or disable cursor-based navigation
+* **`inputMode.scroll`**: Enable or disable mouse-wheel scrolling
+* **`scroll.allowPageScroll`**: Allows scrolling to switch between pages
+* **`scroll.loopScrollWithinPage`**: If `true`, scrolling loops continuously inside the page
+* **`scroll.scrollDelay`**: Delay in milliseconds between scroll inputs
+
+---
 
 ### Item Label Position
 
@@ -59,12 +70,15 @@ itemLabel = {
 }
 ```
 
-* **`position`**: Controls where the label for a selected item appears on the radial menu.
+* **`position`**: Controls where the label for a selected item appears on the radial menu
 
-### Colors
+---
+
+### Colors & Background
 
 ```lua
 colors = {
+    darkerBackground = true,       -- Use darker radial background effect
     primaryWhite = '#f8f8f8',
     secondaryWhite = '#ffffffb6',
     selectedGradient = '#f8f8f8',
@@ -75,11 +89,12 @@ colors = {
 
 **Options:**
 
-* **`primaryWhite`**: Main white color for the menu.
-* **`secondaryWhite`**: Subtle secondary white for borders/backgrounds.
-* **`selectedGradient`**: Highlight background for selected item.
-* **`selectedTextColor`**: Text color for selected item.
-* **`bottomTextColor`**: Text color at the bottom of the UI.
+* **`darkerBackground`**: Enables a dark radial background effect
+* **`primaryWhite`**: Main white color for the menu
+* **`secondaryWhite`**: Subtle secondary white for borders/backgrounds
+* **`selectedGradient`**: Highlight background for the selected item
+* **`selectedTextColor`**: Text color for the selected item
+* **`bottomTextColor`**: Text color at the bottom of the UI
 
 ---
 
@@ -274,14 +289,24 @@ return {
 
     uiSettings = {
         quickmenuSettings = {
-            allowPageScroll = true,
-            loopScrollWithinPage = false,
-            scrollDelay = 120,
+            inputMode = {
+                cursor = false,
+                scroll = true,
+            },
+
+            scroll = {
+                allowPageScroll = true,
+                loopScrollWithinPage = false,
+                scrollDelay = 120,
+            },
         },
+
         itemLabel = {
             position = 'center'
         },
+
         colors = {
+            darkerBackground = true,
             primaryWhite = '#f8f8f8',
             secondaryWhite = '#ffffffb6',
             selectedGradient = '#f8f8f8',
